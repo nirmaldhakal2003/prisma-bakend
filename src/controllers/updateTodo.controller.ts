@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { updateTodo } from "../sql-models/todo.model";
+import { updateTodo } from "../prisma-models/todo.model";
+// import { updateTodo } from "../sql-models/todo.model";
 
 export const updateTodoController = async (req: Request, res: Response) => {
   const params = req.params;

@@ -1,77 +1,138 @@
-import e from "express";
+import { AssignCategoryToTaskInput } from "../controllers/assignCategoryToTask.controller";
+import { TAssignTaskToUserSchema } from "../controllers/assignTaskToUser.controller";
+
+import { Prisma, TaskStatus } from "../generated/prisma/client";
 import { prisma } from "../lib/prisma";
 
-export async function getAllCategories() {
-    const categories = await prisma.category.findMany();
+export async function createTodo(data: Prisma.tasksCreateInput) {
+  if (!data.status) {
+    throw new Error(`Please send valid status`);
+  }
 
-    return categories;
+  const createdTask = await prisma.tasks.create({
+    data: {
+      title: data.title,
+      description: data.description || null,
+      status: data.status,
+    },
+  });
+
+  return createdTask;
 }
 
-export async function getCategoryById(id: number) {
-    const category = await prisma.category.findUnique({
-        where: {
-            id: id,
+type TGetAllTodosWhereInput = {
+  status?: TaskStatus;
+  completedAt?: string;
+  title?: string;
+};
+
+type TGetAllTodosPaginationInput = {
+  page: number;
+  perPage: number;
+};
+
+export async function getAllTodos(
+  whereInput: TGetAllTodosWhereInput,
+  pagination: TGetAllTodosPaginationInput
+) {
+  let tempWhereInput: Prisma.tasksWhereInput = {};
+
+  if (whereInput.status) {
+    tempWhereInput.status = whereInput.status;
+  }
+
+  if (whereInput.completedAt) {
+    tempWhereInput.completed_at = {
+      gte: new Date(whereInput.completedAt),
+    };
+  }
+
+  if (whereInput.title) {
+    tempWhereInput.title = {
+      contains: whereInput.title,
+    };
+  }
+
+  const totalTasks = await prisma.tasks.count({
+    where: tempWhereInput,
+  });
+
+  const tasks = await prisma.tasks.findMany({
+    where: tempWhereInput,
+    take: pagination.perPage,
+    skip: (pagination.page - 1) * pagination.perPage,
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+          username: true,
         },
-    });
+      },
+      task_categories: {
+        select: {
+          category: true,
+        },
+      },
+    },
+  });
 
-    if (!category) {
-        throw new Error("Category not found");
-    }
-
-    return category;
+  return { tasks, totalTasks };
 }
 
-export async function createCategory(body: { name: string; description?: string; }) {
-    prisma.category.create({
-        data: {
-            name: body.name,
-            description: body.description,
-        },
-    });
+export async function deleteTodo(id: number) {
+  const taskFound = await prisma.tasks.findFirst({
+    where: { id },
+  });
+
+  if (!taskFound) {
+    throw new Error(`Task with id - ${id} not found`);
+  }
+
+  return prisma.tasks.delete({
+    where: { id },
+  });
 }
 
-export async function updateCategory(id: number, body: { name?: string; description?: string; }) {
-    const category = await prisma.category.update({
-        where: {
-            id,
-        },
-        data: {
-            name: body.name,
-            description: body.description,
-        },
-    });
+export async function getTodoById(id: number) {
+  const task = await prisma.tasks.findFirst({
+    where: { id },
+  });
 
-    return category;
+  if (!task) {
+    throw new Error(`Task with id - ${id} not found`);
+  }
+
+  return task;
 }
 
-export async function deleteCategory(id: number) {
+export async function updateTodo(id: number, data: Prisma.tasksUpdateInput) {
+  await getTodoById(id);
 
-    const categoryFound = await prisma.category.findUnique({
-        where: {
-            id,
-        },
-    });
-
-    if (!categoryFound) {
-        throw new Error("Category not found");
-    }
-
-    const deletedCategory = await prisma.category.delete({
-        where: {
-            id,
-        },
-    });
-
-    return deletedCategory;
+  return prisma.tasks.update({
+    where: { id },
+    data: data,
+  });
 }
 
-export async function assignCategoryToTask(data: { categoryId: number; taskId: number; }) {
-    const assigned = await prisma.task_categories.create({
-        data: {
-            category_id: data.categoryId,
-            task_id: data.taskId,
-        },
-    });
+export async function assignCategoryToTask(
+  data: AssignCategoryToTaskInput
+) {
+  return prisma.task_categories.create({
+    data: {
+      task_id: data.taskId,
+      category_id: data.categoryId,
+    },
+    include: {
+      task: true,
+      category: true,
+    },
+  });
+}
 
-    return assigned;
+export async function assignTaskToUser(data: TAssignTaskToUserSchema) {
+  return prisma.tasks.update({
+    where: { id: data.taskId },
+    data: { user_id: data.userId },
+  });
 }

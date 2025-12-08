@@ -1,3 +1,4 @@
+import { assignCategoryToTaskController } from "../controllers/assignCategoryToTask.controller";
 import { assignTaskToUserController } from "../controllers/assignTaskToUser.controller";
 import { createTodoController } from "../controllers/createTodo.controller";
 import { deleteTodoController } from "../controllers/deleteTodo.controller";
@@ -12,5 +13,7 @@ export function createTodoRouter(app: Application) {
   app.delete("/todos/:todoId", deleteTodoController);
   app.get("/todos/:todoId", getByIdTodoController);
   app.put("/todos/:todoId", updateTodoController);
-  app.post("/todos/assign-task-to-user", assignTaskToUserController)
+
+  app.post("/todos/assign-category", assignCategoryToTaskController);
+  app.post("/todos/assign-task-to-user", assignTaskToUserController);
 }

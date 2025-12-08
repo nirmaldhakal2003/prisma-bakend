@@ -10,6 +10,10 @@ export const createTodoController = async (req: Request, res: Response) => {
 
   const createdTodo = await createTodo(body);
 
+  // if(createdTodo.status === 'COMPLETED') {
+  //   sendEmailNotificationToUser();
+  // }
+
   res.json({
     message: "create todo",
     data: createdTodo,

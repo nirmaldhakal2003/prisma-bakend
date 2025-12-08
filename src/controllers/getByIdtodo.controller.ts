@@ -1,15 +1,16 @@
 import { Request, Response } from "express";
-import { getTodoById } from "../models/todo.model";
+import { getTodoById } from "../prisma-models/todo.model";
+// import { getTodoById } from "../models/todo.model";
 
-export const getByIdTodoController = (req: Request, res: Response) => {
+export const getByIdTodoController = async (req: Request, res: Response) => {
   const params = req.params;
   const todoId = params.todoId;
   const todoIdNum = parseInt(todoId as string);
 
-  const todo = getTodoById(todoIdNum);
+  const todo = await getTodoById(todoIdNum);
 
   res.json({
     message: "Todo fetched",
-    data: todo.data,
+    data: todo,
   });
 };

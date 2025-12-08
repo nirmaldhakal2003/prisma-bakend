@@ -4,26 +4,35 @@ import { TaskStatus } from "../generated/prisma/enums";
 // import { getAllTodos, StatusType } from "../models/todo.model";
 
 export const getAllTodosController = async (req: Request, res: Response) => {
-  const query = req.query;
+  const query = req.query; // GET /todos?status=COMPLETED&completed_at=2025-11-01&title=database&page=2
 
   const status = query.status as TaskStatus;
-  const completedAt = query.completedAt as 'yyyy-mm-dd';
-  const title = query.title as string;
+  const completedAt = query.completed_at as string; // "yyyy-mm-dd"
+  const title = query.title as string; // "database"
 
-  // const pagination
+  const page = query.page || "1";
+  const pageNum = Number(page);
+  const perPage = 10;
 
-
-  const todos = await getAllTodos({
-    status: status,
-    completedAt,
-    title,
-  },
-  {
-    page: query.page ? parseInt(query.page as string) : undefined,
-  });
+  const todosRes = await getAllTodos(
+    {
+      status: status,
+      completedAt,
+      title,
+    },
+    {
+      page: pageNum,
+      perPage: perPage,
+    }
+  );
 
   res.json({
     message: "Todos fetched!",
-    data: todos,
+    data: todosRes.tasks,
+    pagination: {
+      page: pageNum,
+      perPage: perPage,
+      total: todosRes.totalTasks,
+    },
   });
 };

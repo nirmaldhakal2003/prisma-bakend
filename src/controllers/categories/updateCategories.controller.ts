@@ -1,11 +1,20 @@
 import { Request, Response } from "express";
+import { updateCategory } from "../../prisma-models/category.model";
 
-type updateCategoryInput = {
-    name?: string;
-    description?: string;
-}
+export type UpdateCategoryInput = {
+  name?: string;
+  description?: string;
+};
 
-export async function updateCategoriesController(req:Request, res:Response  ) {
-    const categoryId = Number (req.params.categoryId);
-    const body = req.body as updateCategoryInput;
+export async function updatecategoryController(req: Request, res: Response) {
+  const categoryId = Number(req.params.categoryId);
+
+  const body = req.body as UpdateCategoryInput;
+
+  const category = await updateCategory(categoryId, body);
+
+  res.json({
+    data: category,
+    message: "Category updated!",
+  });
 }
