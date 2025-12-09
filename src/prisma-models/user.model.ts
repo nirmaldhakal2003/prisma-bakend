@@ -4,7 +4,7 @@ import { TUpdateUserSchema } from "../controllers/users/updateUserById.controlle
 import { prisma } from "../lib/prisma";
 
 export async function createUser(data: TSignUpUserSchema) {
-  // check if user already exists by that email
+  // check if user already exists by that email 
   const userFound = await prisma.users.findFirst({
     where: {
       OR: [
@@ -72,7 +72,7 @@ export async function getUserById(id: number) {
 export async function updateUserById(id: number, data: TUpdateUserSchema) {
   const userFound = await getUserById(id);
 
-  // figure out if email has changed
+  // check weather if email has changed
   if (userFound.email !== data.email) {
     // email is changed
     const emailsFound = await prisma.users.findMany({
