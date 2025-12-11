@@ -1,10 +1,11 @@
 import { TLoginUserSchema } from "../controllers/users/loginUser.controller";
 import { TSignUpUserSchema } from "../controllers/users/signupUser.controller";
 import { TUpdateUserSchema } from "../controllers/users/updateUserById.controller";
+import { comparePassword } from "../lib/hash";
 import { prisma } from "../lib/prisma";
 
 export async function createUser(data: TSignUpUserSchema) {
-  // check if user already exists by that email 
+  // check if user already exists by that email
   const userFound = await prisma.users.findFirst({
     where: {
       OR: [
@@ -26,6 +27,7 @@ export async function createUser(data: TSignUpUserSchema) {
       email: data.email,
       password: data.password,
       username: data.username,
+      role: "USER",
     },
   });
   return createdUser;
@@ -42,10 +44,15 @@ export async function loginUser(data: TLoginUserSchema) {
     throw new Error(`You are not registered! Please register.`);
   }
 
-  if (data.password !== userFound.password) {
-    throw new Error(`Username or password invalid`);
+  // check if password matches
+  const isPasswordCorrect = await comparePassword(
+    userFound.password,
+    data.password
+  );
+
+  if (!isPasswordCorrect) {
+    throw new Error(`Username or password is incorrect!`);
   }
-  // missing
 
   return userFound;
 }
@@ -72,7 +79,7 @@ export async function getUserById(id: number) {
 export async function updateUserById(id: number, data: TUpdateUserSchema) {
   const userFound = await getUserById(id);
 
-  // check weather if email has changed
+  // figure out if email has changed
   if (userFound.email !== data.email) {
     // email is changed
     const emailsFound = await prisma.users.findMany({

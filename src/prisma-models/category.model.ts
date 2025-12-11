@@ -1,138 +1,58 @@
-import { AssignCategoryToTaskInput } from "../controllers/assignCategoryToTask.controller";
-import { TAssignTaskToUserSchema } from "../controllers/assignTaskToUser.controller";
-
-import { Prisma, TaskStatus } from "../generated/prisma/client";
+import { CreateCategoryInput } from "../controllers/categories/createCategory.controller";
+import { UpdateCategoryInput } from "../controllers/categories/updateCategories.controller";
 import { prisma } from "../lib/prisma";
 
-export async function createTodo(data: Prisma.tasksCreateInput) {
-  if (!data.status) {
-    throw new Error(`Please send valid status`);
+export async function getAllCategories() {
+  const categories = await prisma.categories.findMany();
+  return categories;
+}
+
+export async function getCategoryById(id: number) {
+  const category = await prisma.categories.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!category) {
+    throw new Error(`Category with id - ${id} not found!`);
   }
 
-  const createdTask = await prisma.tasks.create({
+  return category;
+}
+
+export async function createCategory(data: CreateCategoryInput) {
+  const createdCategory = await prisma.categories.create({
     data: {
-      title: data.title,
+      name: data.name,
       description: data.description || null,
-      status: data.status,
     },
   });
-
-  return createdTask;
+  return createdCategory;
 }
 
-type TGetAllTodosWhereInput = {
-  status?: TaskStatus;
-  completedAt?: string;
-  title?: string;
-};
+export async function updateCategory(id: number, data: UpdateCategoryInput) {
+  const categoryFound = await getCategoryById(id);
 
-type TGetAllTodosPaginationInput = {
-  page: number;
-  perPage: number;
-};
-
-export async function getAllTodos(
-  whereInput: TGetAllTodosWhereInput,
-  pagination: TGetAllTodosPaginationInput
-) {
-  let tempWhereInput: Prisma.tasksWhereInput = {};
-
-  if (whereInput.status) {
-    tempWhereInput.status = whereInput.status;
-  }
-
-  if (whereInput.completedAt) {
-    tempWhereInput.completed_at = {
-      gte: new Date(whereInput.completedAt),
-    };
-  }
-
-  if (whereInput.title) {
-    tempWhereInput.title = {
-      contains: whereInput.title,
-    };
-  }
-
-  const totalTasks = await prisma.tasks.count({
-    where: tempWhereInput,
-  });
-
-  const tasks = await prisma.tasks.findMany({
-    where: tempWhereInput,
-    take: pagination.perPage,
-    skip: (pagination.page - 1) * pagination.perPage,
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          username: true,
-        },
-      },
-      task_categories: {
-        select: {
-          category: true,
-        },
-      },
+  const updatedCategory = await prisma.categories.update({
+    where: {
+      id: categoryFound.id,
     },
-  });
-
-  return { tasks, totalTasks };
-}
-
-export async function deleteTodo(id: number) {
-  const taskFound = await prisma.tasks.findFirst({
-    where: { id },
-  });
-
-  if (!taskFound) {
-    throw new Error(`Task with id - ${id} not found`);
-  }
-
-  return prisma.tasks.delete({
-    where: { id },
-  });
-}
-
-export async function getTodoById(id: number) {
-  const task = await prisma.tasks.findFirst({
-    where: { id },
-  });
-
-  if (!task) {
-    throw new Error(`Task with id - ${id} not found`);
-  }
-
-  return task;
-}
-
-export async function updateTodo(id: number, data: Prisma.tasksUpdateInput) {
-  await getTodoById(id);
-
-  return prisma.tasks.update({
-    where: { id },
-    data: data,
-  });
-}
-
-export async function assignCategoryToTask(
-  data: AssignCategoryToTaskInput
-) {
-  return prisma.task_categories.create({
     data: {
-      task_id: data.taskId,
-      category_id: data.categoryId,
-    },
-    include: {
-      task: true,
-      category: true,
+      name: data.name || categoryFound.name,
+      description: data.description || null,
     },
   });
+  return updatedCategory;
 }
 
-export async function assignTaskToUser(data: TAssignTaskToUserSchema) {
-  return prisma.tasks.update({
-    where: { id: data.taskId },
-    data: { user_id: data.userId },
+export async function deleteCategory(id: number) {
+  const categoryFound = await getCategoryById(id);
+
+  const deletedCategory = await prisma.categories.delete({
+    where: {
+      id: categoryFound.id,
+    },
   });
+  return deletedCategory;
 }

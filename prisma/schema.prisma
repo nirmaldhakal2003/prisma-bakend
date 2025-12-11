@@ -1,5 +1,11 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../src/generated/prisma"
 }
 
@@ -25,17 +31,34 @@ model tasks {
   user_id Int?
   user    users? @relation(references: [id], fields: [user_id])
 
-  tasksCategories tasks_categories[]
+  tasksCatgories tasks_catgories[]
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  USER
 }
 
 model users {
   id         Int      @id @default(autoincrement())
   email      String   @unique
   username   String   @unique
-  password   String   @db.VarChar(15)
+  password   String   @db.VarChar(255)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  tasks      tasks[]
+
+  role Role @default(USER)
+
+  tasks        tasks[]
+  userSessions UserSession[]
+}
+
+model UserSession {
+  id         Int    @id @default(autoincrement())
+  user_id    Int
+  user       users  @relation(fields: [user_id], references: [id])
+  session_id String
 }
 
 model categories {
@@ -44,10 +67,10 @@ model categories {
   description    String?
   created_at     DateTime          @default(now())
   updated_at     DateTime          @updatedAt
-  tasksCatgories tasks_categories[]
+  tasksCatgories tasks_catgories[]
 }
 
-model tasks_categories {
+model tasks_catgories {
   task_id     Int
   task        tasks      @relation(fields: [task_id], references: [id])
   category_id Int

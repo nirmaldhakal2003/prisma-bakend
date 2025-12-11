@@ -1,7 +1,6 @@
 import { AssignCategoryToTaskInput } from "../controllers/assignCategoryToTask.controller";
 import { TAssignTaskToUserSchema } from "../controllers/assignTaskToUser.controller";
-import { TaskStatus } from "../generated/prisma";
-import { Prisma } from "../generated/prisma/browser";
+import { Prisma, TaskStatus } from "../generated/prisma/client";
 import { prisma } from "../lib/prisma";
 
 export async function createTodo(data: Prisma.tasksCreateInput) {
@@ -53,7 +52,28 @@ export async function getAllTodos(
     };
   }
 
-  
+  /**
+   
+  {
+    status: "IN_PROGRESS",
+
+  if (whereInput.status) {
+    completed_at: {
+      gte: new Date("2025-11-01")
+    }
+  }
+    
+
+  if (whereInput.status) {
+   */
+  // perPage = 10
+  // total =35
+  // page = 1
+  // 10
+
+  // page: 1    2   3   4
+  // skip: 0    10  20  30
+  // formula: (pageNum - 1) * perPage
 
   const totalTasks = await prisma.tasks.count({
     where: tempWhereInput,
@@ -152,28 +172,3 @@ export async function assignTaskToUser(data: TAssignTaskToUserSchema) {
   });
   return task;
 }
-
-
-
-/**
-   
-  {
-    status: "IN_PROGRESS",
-
-  if (whereInput.status) {
-    completed_at: {
-      gte: new Date("2025-11-01")
-    }
-  }
-    
-
-  if (whereInput.status) {
-   */
-  // perPage = 10
-  // total =35
-  // page = 1
-  // 10
-
-  // page: 1    2   3   4
-  // skip: 0    10  20  30
-  // formula: (pageNum - 1) * perPage
