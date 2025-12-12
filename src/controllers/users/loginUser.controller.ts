@@ -39,6 +39,11 @@ export async function loginUserController(req: Request, res: Response) {
 
   res.cookie("token", randomString, {
     httpOnly: true,
+    maxAge : 1 * 60 * 1000, // 1 minute paxi cookie expire hunxa.
+    domain: "*.localhost", //one.localhost, two.localhost means subdomain ma cookies pass hunxa.
+    secure: false, // production ma sadhai true huna parxa hai ta.
+    sameSite: "lax", // hacker dekhi bachuxa.
+    path: "/" , // kun path ma cookies send garna vanera ho. defauly "/" ho.
   });
 
   res.json({

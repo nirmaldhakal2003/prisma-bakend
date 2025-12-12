@@ -29,7 +29,9 @@ app.get(
     if (user === "ram") {
       req.user = {
         id: 1,
-        name: "ram",
+        username: "ram",
+        email: "nirmal@gmail.com",
+        role: "SUPER_ADMIN",
       };
 
       next();
