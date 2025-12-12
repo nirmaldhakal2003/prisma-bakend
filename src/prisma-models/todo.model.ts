@@ -91,7 +91,7 @@ export async function getAllTodos(
           username: true,
         },
       },
-      task_categories: {
+      tasksCatgories: {
         select: {
           category: true,
         },
@@ -147,7 +147,7 @@ export async function updateTodo(id: number, data: Prisma.tasksUpdateInput) {
 }
 
 export async function assignCategoryToTask(data: AssignCategoryToTaskInput) {
-  const assigned = await prisma.task_categories.create({
+  const assigned = await prisma.tasks_catgories.create({
     data: {
       task_id: data.taskId,
       category_id: data.categoryId,
