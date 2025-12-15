@@ -93,3 +93,12 @@ npm run dev
 ```
 
 ---
+
+## 8. Json web Token
+```bash
+npm install jsonwebtoken
+```
+
+```bash
+npm install -D @types/jsonwebtoken
+```
