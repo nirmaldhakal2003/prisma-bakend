@@ -102,3 +102,13 @@ npm install jsonwebtoken
 ```bash
 npm install -D @types/jsonwebtoken
 ```
+
+## 9. prisma database change to sql.
+```bash
+npx prisma migrate dev
+```
+
+## 10. prisma deploy 
+```bash
+npx prisma migrate deploy
+```mo

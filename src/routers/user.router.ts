@@ -32,4 +32,7 @@ export async function createUserRouter(app: Application) {
   app.get("/users/:userId", checkAuth,generateAccessControlMiddleware(["SUPER_ADMIN","ADMIN","USER"]), getUserByIdController);
 
   app.post("/users/logout", checkAuth, logoutUserController);
+
+
+  app.get("/user/refresh_token", ,refeshTokenController)
 }
