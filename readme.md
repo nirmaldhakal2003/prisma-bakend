@@ -83,13 +83,21 @@ npx prisma init
 ```bash
 npx prisma generate
 ```
+```bash
+npx prisma db push
+```
+```bash
+npx prisma db studio
+```
 
 ---
+
 
 ## 7. Start Development Server
 
 ```bash
 npm run dev
 ```
+
 
 ---
